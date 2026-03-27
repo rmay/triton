@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <link rel="shortcut icon" href="../img/favicon.ico" />
-    <title>Shortcuts - Archon Documentation</title>
+    <title>Shortcuts - Triton Documentation</title>
     <link rel="stylesheet" href="../css/theme.css" />
     <link rel="stylesheet" href="../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
@@ -30,7 +30,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
     <div class="wy-side-scroll">
       <div class="wy-side-nav-search">
-          <a href=".." class="icon icon-home"> Archon Documentation
+          <a href=".." class="icon icon-home"> Triton Documentation
         </a><div role="search">
   <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
       <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
@@ -51,48 +51,8 @@
                 <li class="toctree-l1 current"><a class="reference internal current" href="#">Shortcuts</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#xbindkeys">xbindkeys</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#arhcon-terminal">Arhcon terminal</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#archon-dmenu-launcher">Archon dmenu launcher</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#archon-rofi-launcher">Archon rofi launcher</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#x-terminal">X terminal</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#printscreen-region-screenshot">PrintScreen → region screenshot</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#shiftprintscreen-full-screen">Shift+PrintScreen → full screen</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#ctrlprintscreen-active-window">Ctrl+PrintScreen → active window</a>
-    </li>
-        </ul>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#window-maker-additional-shortcuts">Window Maker additional shortcuts</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#workspace1key">Workspace1Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#workspace2key">Workspace2Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#workspace3key">Workspace3Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#workspace4key">Workspace4Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#movetoworkspace1key">MoveToWorkspace1Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#movetoworkspace2key">MoveToWorkspace2Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#movetoworkspace3key">MoveToWorkspace3Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#movetoworkspace4key">MoveToWorkspace4Key</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#lhmaximizekey">LHMaximizeKey</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#rhmaximizekey">RHMaximizeKey</a>
-    </li>
-    <li class="toctree-l3"><a class="reference internal" href="#maximizekey">MaximizeKey</a>
-    </li>
-        </ul>
     </li>
     </ul>
                 </li>
@@ -108,7 +68,7 @@
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
       <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="..">Archon Documentation</a>
+          <a href="..">Triton Documentation</a>
         
       </nav>
       <div class="wy-nav-content">
@@ -125,53 +85,121 @@
             <div class="section" itemprop="articleBody">
               
                 <h1 id="shortcuts">Shortcuts</h1>
+<p>Triton doesn't provide any special support for shortcuts. Use any text editor to change your xbindings and the WM Preferences for WM shortcuts.</p>
 <h2 id="xbindkeys">xbindkeys</h2>
-<h3 id="arhcon-terminal">Arhcon terminal</h3>
-<p>"archon-terminal"<br />
-Mod4 + Return</p>
-<h3 id="archon-dmenu-launcher">Archon dmenu launcher</h3>
-<p>"archon_dmenu_run"<br />
-  Mod4 + grave</p>
-<h3 id="archon-rofi-launcher">Archon rofi launcher</h3>
-<p>"rofi -show run"<br />
-  Mod4 + space</p>
-<h3 id="x-terminal">X terminal</h3>
-<p>"xterm"<br />
-  Shift + Mod4 + Return</p>
-<h3 id="printscreen-region-screenshot">PrintScreen → region screenshot</h3>
-<p>"flameshot gui"<br />
-    Alt + F10</p>
-<h3 id="shiftprintscreen-full-screen">Shift+PrintScreen → full screen</h3>
-<p>"flameshot full -p ~/Pictures"<br />
-    Alt + F11</p>
-<h3 id="ctrlprintscreen-active-window">Ctrl+PrintScreen → active window</h3>
-<p>"flameshot screen -p ~/Pictures"<br />
-    Alt + F12</p>
+<table>
+<thead>
+<tr>
+<th>Key Combination</th>
+<th>Action</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mod4 + Return</td>
+<td>Triton terminal</td>
+<td><code>triton-terminal</code></td>
+</tr>
+<tr>
+<td>Mod4 + ~ (grave)</td>
+<td>Triton dmenu launcher</td>
+<td><code>triton-dmenu-run</code></td>
+</tr>
+<tr>
+<td>Mod4 + Space</td>
+<td>Triton rofi launcher</td>
+<td><code>rofi -show run</code></td>
+</tr>
+<tr>
+<td>Shift + Mod4 + Return</td>
+<td>X terminal</td>
+<td><code>xterm</code></td>
+</tr>
+<tr>
+<td>Alt + F10</td>
+<td>Region screenshot</td>
+<td><code>flameshot gui</code></td>
+</tr>
+<tr>
+<td>Alt + F11</td>
+<td>Full screen screenshot</td>
+<td><code>flameshot full -p ~/Pictures</code></td>
+</tr>
+<tr>
+<td>Alt + F12</td>
+<td>Active window screenshot</td>
+<td><code>flameshot screen -p ~/Pictures</code></td>
+</tr>
+</tbody>
+</table>
 <h2 id="window-maker-additional-shortcuts">Window Maker additional shortcuts</h2>
-<h3 id="workspace1key">Workspace1Key</h3>
-<p>"Mod4+1"</p>
-<h3 id="workspace2key">Workspace2Key</h3>
-<p>"Mod4+2"</p>
-<h3 id="workspace3key">Workspace3Key</h3>
-<p>"Mod4+3"</p>
-<h3 id="workspace4key">Workspace4Key</h3>
-<p>"Mod4+4"</p>
-<h3 id="movetoworkspace1key">MoveToWorkspace1Key</h3>
-<p>"Control+Mod4+1"</p>
-<h3 id="movetoworkspace2key">MoveToWorkspace2Key</h3>
-<p>Control+Mod4+2"</p>
-<h3 id="movetoworkspace3key">MoveToWorkspace3Key</h3>
-<p>"Control+Mod4+3"</p>
-<h3 id="movetoworkspace4key">MoveToWorkspace4Key</h3>
-<p>"Control+Mod4+4"</p>
-<h3 id="lhmaximizekey">LHMaximizeKey</h3>
-<p><strong>This maximizes the focused window on the left hand side of the screen</strong></p>
-<p>"Mod4+Left"</p>
-<h3 id="rhmaximizekey">RHMaximizeKey</h3>
-<p><strong>This maximizes the focused window on the right hand side of the screen</strong></p>
-<p>"Mod4+Right"</p>
-<h3 id="maximizekey">MaximizeKey</h3>
-<p>"Mod4+Up"</p>
+<table>
+<thead>
+<tr>
+<th>Key Combination</th>
+<th>Action</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mod4 + 1</td>
+<td>Switch to Workspace 1</td>
+<td></td>
+</tr>
+<tr>
+<td>Mod4 + 2</td>
+<td>Switch to Workspace 2</td>
+<td></td>
+</tr>
+<tr>
+<td>Mod4 + 3</td>
+<td>Switch to Workspace 3</td>
+<td></td>
+</tr>
+<tr>
+<td>Mod4 + 4</td>
+<td>Switch to Workspace 4</td>
+<td></td>
+</tr>
+<tr>
+<td>Ctrl + Mod4 + 1</td>
+<td>Move focused window to Workspace 1</td>
+<td></td>
+</tr>
+<tr>
+<td>Ctrl + Mod4 + 2</td>
+<td>Move focused window to Workspace 2</td>
+<td></td>
+</tr>
+<tr>
+<td>Ctrl + Mod4 + 3</td>
+<td>Move focused window to Workspace 3</td>
+<td></td>
+</tr>
+<tr>
+<td>Ctrl + Mod4 + 4</td>
+<td>Move focused window to Workspace 4</td>
+<td></td>
+</tr>
+<tr>
+<td>Mod4 + Left</td>
+<td>Maximize window left half</td>
+<td>Maximizes the focused window to the left half of the screen</td>
+</tr>
+<tr>
+<td>Mod4 + Right</td>
+<td>Maximize window right half</td>
+<td>Maximizes the focused window to the right half of the screen</td>
+</tr>
+<tr>
+<td>Mod4 + Up</td>
+<td>Maximize window full</td>
+<td>Maximizes the focused window</td>
+</tr>
+</tbody>
+</table>
               
             </div>
           </div><footer>
