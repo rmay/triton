@@ -1,0 +1,28 @@
+#!/bin/sh
+set -e
+
+THEMES_DIR="$HOME/.config/triton/themes/"
+CURRENT_THEME_DIR="$HOME/.config/triton/current/theme"
+CURRENT_THEME_NAME=$(basename "$(realpath "$CURRENT_THEME_DIR")")
+
+# Prompt user with rofi, building display names on the fly
+selection=$(find "$THEMES_DIR" -mindepth 1 -maxdepth 1 \( -type d -o -type l \) | sort | while IFS= read -r path; do
+  filename=$(basename "$path")
+  display_name=$(printf '%s' "$filename" | sed 's/-/ /g' | awk '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}')
+  if [ "$filename" = "$CURRENT_THEME_NAME" ]; then
+    printf '* %s\n' "$display_name"
+  else
+    printf '%s\n' "$display_name"
+  fi
+done | rofi -dmenu -i -p "Select Theme:") || exit 0
+
+[ -z "$selection" ] && exit 0
+
+# Clean markup/prefix: "* Tokyo Night" -> "Tokyo Night"
+clean_selection=$(printf '%s' "$selection" | sed 's/^\* //')
+
+# Convert to lowercase and dash-separated: "Tokyo Night" -> "tokyo-night"
+selected_theme=$(printf '%s' "$clean_selection" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+# Apply the selected theme
+"$HOME/.local/share/triton/bin/triton-theme-set" "$selected_theme"

@@ -1,0 +1,7 @@
+site_name: Triton Documentation
+nav:
+  - Home: index.md
+  - Hardware Requirements: hardwarereqs.md
+  - Shortcuts: shortcuts.md
+  - Screenshots: screenshots/index.md
+theme: readthedocs

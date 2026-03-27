@@ -1,0 +1,6 @@
+#!/bin/sh
+if command -v chromium >/dev/null 2>&1; then
+    exec chromium "$@"
+else
+    notify-send "Chromium" "Chromium is not installed. Install it via pkg or ports." --icon=dialog-error
+fi

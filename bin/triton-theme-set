@@ -1,0 +1,35 @@
+#!/bin/sh
+
+# triton-theme-set: Set a theme, specified by its name.
+# Usage: triton-theme-set <theme-name>
+
+if [ -z "$1" ]; then
+  printf "Usage: triton-theme-set <theme-name>\n" >&2
+  exit 1
+fi
+
+THEMES_DIR="$HOME/.config/triton/themes/"
+CURRENT_THEME_DIR="$HOME/.config/triton/current/theme"
+
+THEME_NAME="$1"
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+# Check if the theme entered exists
+if [ ! -d "$THEME_PATH" ]; then
+  printf "Theme '%s' does not exist in %s\n" "$THEME_NAME" "$THEMES_DIR" >&2
+  exit 2
+fi
+
+# Update theme symlinks
+ln -nsf "$THEME_PATH" "$CURRENT_THEME_DIR"
+
+# Restart components to apply new theme
+pkill -SIGUSR2 btop
+
+xrdb -merge "$CURRENT_THEME_DIR/$THEME_NAME.Xresources"
+killall -USR1 st 2>/dev/null
+
+ln -nsf "$CURRENT_THEME_DIR/rofi/config.rasi" "$HOME/.config/rofi/config.rasi"
+
+# Set new background
+$HOME/.local/share/triton/bin/triton-theme-bg-next

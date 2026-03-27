@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+# Show logo
+clear
+cat ~/.local/share/triton/logo.txt
+
+# Get the latest while trying to preserve any modifications
+triton_path=~/.local/share/triton
+git -C "$triton_path" pull --autostash
+git -C "$triton_path" diff --check || git -C "$triton_path" reset --merge
+
+# Run migrations
+"$HOME/.local/share/triton/bin/triton-migrate"
+
+# Update system packages
+printf '\033[32m\nUpdate system packages\033[0m\n'
+doas pkg upgrade -y
+
+# Offer to reboot if the kernel has been changed
+running=$(uname -r)
+installed=$(freebsd-version -k 2>/dev/null || printf "%s\n" "$running")
+if [ "$running" != "$installed" ]; then
+  gum confirm "FreeBSD kernel has been updated. Reboot?" && doas reboot
+fi

@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Cycles through the background images available
+
+BACKGROUNDS_DIR="$HOME/.config/triton/current/theme/backgrounds/"
+CURRENT_BACKGROUND_LINK="$HOME/.config/triton/current/background"
+
+TOTAL=$(find "$BACKGROUNDS_DIR" -type f | sort | wc -l | tr -d ' ')
+
+if [ "$TOTAL" -eq 0 ]; then
+  notify-send "No background was found for theme" -t 2000
+else
+  if [ -L "$CURRENT_BACKGROUND_LINK" ]; then
+    CURRENT_BACKGROUND=$(readlink "$CURRENT_BACKGROUND_LINK")
+  else
+    CURRENT_BACKGROUND=""
+  fi
+
+  # Find next background (wrap around to first if at end or not found)
+  NEW_BACKGROUND=$(find "$BACKGROUNDS_DIR" -type f | sort | {
+    first=""
+    found=0
+    while IFS= read -r f; do
+      [ -z "$first" ] && first="$f"
+      if [ "$found" -eq 1 ]; then
+        printf '%s\n' "$f"
+        exit 0
+      fi
+      [ "$f" = "$CURRENT_BACKGROUND" ] && found=1
+    done
+    printf '%s\n' "$first"
+  })
+
+  ln -nsf "$NEW_BACKGROUND" "$CURRENT_BACKGROUND_LINK"
+  wmsetbg "$CURRENT_BACKGROUND_LINK"
+fi

@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+PYTHON_VERSION=$(mise ls-remote python 2>/dev/null \
+        | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' \
+        | sort -t. -k1,1n -k2,2n -k3,3n \
+        | tail -1)
+
+[ -z "$PYTHON_VERSION" ] && { printf "Could not determine latest Python version\n"; exit 1; }
+printf "Latest Python: %s\n" "$PYTHON_VERSION"
+
+mise install python@"$PYTHON_VERSION"
+mise use --global python@"$PYTHON_VERSION"

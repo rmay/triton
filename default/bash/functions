@@ -1,0 +1,71 @@
+# Compression
+compress() { tar -czf "${1%/}.tar.gz" "${1%/}"; }
+alias decompress="tar -xzf"
+
+# Write iso file to sd card
+iso2sd() {
+  if [ $# -ne 2 ]; then
+    printf "Usage: iso2sd <input_file> <output_device>\n"
+    printf "Example: iso2sd ~/Downloads/ubuntu-25.04-desktop-amd64.iso /dev/sda\n"
+    printf "\nAvailable SD cards:\n"
+    lsblk -d -o NAME | grep -E '^sd[a-z]' | awk '{print "/dev/"$1}'
+  else
+    doas dd bs=4M status=progress oflag=sync if="$1" of="$2"
+    doas eject $2
+  fi
+}
+
+# Create a desktop launcher for a web app
+web2app() {
+  if [ "$#" -ne 3 ]; then
+    printf "Usage: web2app <AppName> <AppURL> <IconURL> (IconURL must be in PNG -- use https://dashboardicons.com)\n"
+    return 1
+  fi
+
+  local APP_NAME="$1"
+  local APP_URL="$2"
+  local ICON_URL="$3"
+  local ICON_DIR="$HOME/.local/share/applications/icons"
+  local DESKTOP_FILE="$HOME/.local/share/applications/${APP_NAME}.desktop"
+  local ICON_PATH="${ICON_DIR}/${APP_NAME}.png"
+
+  mkdir -p "$ICON_DIR"
+
+  if ! curl -sL -o "$ICON_PATH" "$ICON_URL"; then
+    printf "Error: Failed to download icon.\n"
+    return 1
+  fi
+
+  cat > "$DESKTOP_FILE" <<EOF
+[Desktop Entry]
+Version=1.0
+Name=$APP_NAME
+Comment=$APP_NAME
+Exec=chromium --new-window --ozone-platform=x11 --app="$APP_URL" --name="$APP_NAME" --class="$APP_NAME"
+Terminal=false
+Type=Application
+Icon=$ICON_PATH
+StartupNotify=true
+EOF
+
+  chmod +x "$DESKTOP_FILE"
+}
+
+web2app-remove() {
+  if [ "$#" -ne 1 ]; then
+    printf "Usage: web2app-remove <AppName>\n"
+    return 1
+  fi
+
+  local APP_NAME="$1"
+  local ICON_DIR="$HOME/.local/share/applications/icons"
+  local DESKTOP_FILE="$HOME/.local/share/applications/${APP_NAME}.desktop"
+  local ICON_PATH="${ICON_DIR}/${APP_NAME}.png"
+
+  rm "$DESKTOP_FILE"
+  rm "$ICON_PATH"
+}
+
+function eo() {
+  emacsclient -n "$1" &> /dev/null
+}

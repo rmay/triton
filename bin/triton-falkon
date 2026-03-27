@@ -1,0 +1,6 @@
+#!/bin/sh
+if command -v falkon >/dev/null 2>&1; then
+    exec falkon "$@"
+else
+    notify-send "Falkon" "Falkon is not installed. Install it via pkg or ports." --icon=dialog-error
+fi

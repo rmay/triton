@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+NEW_TERMINAL="$1"
+
+cat > "$HOME/.terminalrc" <<EOF
+TERMINAL=$NEW_TERMINAL
+EOF

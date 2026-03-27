@@ -1,0 +1,10 @@
+#!/bin/sh
+set -eu
+
+CONFIG="${HOME}/.terminalrc"
+[ -f "$CONFIG" ] && . "$CONFIG"
+
+# Default to xterm if not set
+TERMINAL="${TERMINAL:-xterm}"
+
+exec "$TERMINAL" "$@"

@@ -1,0 +1,1 @@
+config files need to be in the themes directories.

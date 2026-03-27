@@ -1,0 +1,237 @@
+#!/bin/sh
+set -e
+
+SQUEAK_HOME="$HOME/Squeak"
+TARGET_APP="$HOME/.local/share/archon/applications"
+VM_ROOT="$SQUEAK_HOME/opensmalltalk-vm"
+
+printf "=== Installing dependencies ===\n"
+doas pkg install -y gmake pkgconf unzip wget \
+    libX11 libXt libXrender libXrandr libICE libSM \
+    freetype2 fontconfig cairo pango \
+    mesa-libs libglvnd libdrm \
+    gcc
+
+mkdir -p "$SQUEAK_HOME"
+cd "$VM_ROOT" || { mkdir -p "$VM_ROOT" && cd "$VM_ROOT"; }
+
+printf "=== Cloning/updating repo (Cog branch) ===\n"
+git clone https://github.com/OpenSmalltalk/opensmalltalk-vm.git . 2>/dev/null || true
+git checkout Cog || git checkout main
+git pull
+
+printf "=== Updating version stamps ===\n"
+./scripts/updateSCCSVersions || printf "Skipped (not critical)\n"
+
+printf "=== Creating utmp.h shim ===\n"
+SHIM_DIR="$VM_ROOT/include"
+mkdir -p "$SHIM_DIR"
+cat > "$SHIM_DIR/utmp.h" << 'EOF'
+#pragma once
+#include <utmpx.h>
+#define utmp       utmpx
+#define ut_name    ut_user
+#define getutent   getutxent
+#define setutent   setutxent
+#define endutent   endutxent
+#define pututline  pututxline
+EOF
+
+printf "=== Checking for linux template ===\n"
+LINUX_TEMPLATE="$VM_ROOT/building/linux64x64/squeak.cog.spur"
+if [ ! -d "$LINUX_TEMPLATE" ]; then
+    printf "ERROR: Template not found at %s\n" "$LINUX_TEMPLATE"
+    printf "Current building/ contents:\n"
+    ls -l "$VM_ROOT/building/" 2>/dev/null || printf "No building/ dir!\n"
+    printf "Branch: %s\n" "$(git branch --show-current)"
+    printf "Try: rm -rf %s; git clone https://github.com/OpenSmalltalk/opensmalltalk-vm.git %s; git checkout Cog\n" "$VM_ROOT" "$VM_ROOT"
+    exit 1
+fi
+printf "Template found OK\n"
+
+printf "=== Copying template to FreeBSD dir ===\n"
+rm -rf "$VM_ROOT/build.freebsd64x64" || true
+mkdir "$VM_ROOT/build.freebsd64x64"
+cp -a "$LINUX_TEMPLATE" "$VM_ROOT/build.freebsd64x64/squeak.cog.spur" || {
+    printf "cp failed! Check permissions or path.\n"
+    ls -ld "$LINUX_TEMPLATE" "$VM_ROOT/build.freebsd64x64"
+    exit 1
+}
+printf "Copy succeeded - dir created: %s/build.freebsd64x64/squeak.cog.spur\n" "$VM_ROOT"
+
+cd "$VM_ROOT/build.freebsd64x64/squeak.cog.spur"
+
+# === Logging starts here ===
+
+LOGFILE="$VM_ROOT/build.freebsd64x64/build-log.txt"
+> "$LOGFILE"   # empty previous log
+
+log() {
+  ts=$(date '+%Y-%m-%d %H:%M:%S')
+  printf "[%s] %s\n" "$ts" "$*" | tee -a "$LOGFILE"
+}
+
+log "Build phase started in $(pwd)"
+log "Shim dir: $SHIM_DIR"
+log "Plugins.int exists? %s\n" "$([ -f plugins.int ] && printf 'yes' || printf 'no')"
+
+SPUR_DIR="$VM_ROOT/src/spur64.cog/"
+
+if [ -z "$SPUR_DIR" ]; then
+    printf "No spur %s dir with interp.h found!\n" "$SPUR_DIR"
+fi
+
+log "Using sources from $SPUR_DIR"
+
+# Symlink setup
+mkdir -p src
+ln -sf "$VM_ROOT/src/plugins" src/plugins
+ln -sf "$VM_ROOT/src/$SPUR_DIR" src/vm
+
+cp "$SPUR_DIR"* "$VM_ROOT/src/" 2>> "$LOGFILE" || log "Warning: cp from $SPUR_DIR failed"
+
+# plugins.int fallback
+if [ ! -f "plugins.int" ]; then
+    log "Creating minimal plugins.int"
+    cat > plugins.int << EOF
+X11
+FilePlugin
+SocketPlugin
+LocalePlugin
+MiscPrimitivePlugin
+SecurityPlugin
+LargeIntegers
+FloatMathPlugin
+EOF
+    printf "\n" > plugins.ext
+fi
+mkdir -p build
+cp plugins.int plugins.ext build/ 2>> "$LOGFILE" || log "Warning: cp plugins to build/ failed"
+
+# Build
+BUILD_CMD=""
+if [ -f "mvm" ]; then
+    log "=== Patching mvm ==="
+    sed -i '' '/case $(uname -s) in/a\
+    FreeBSD)\
+        CFLAGS="$CFLAGS -I/usr/local/include -I$SHIM_DIR -Wno-error=incompatible-pointer-types -Wno-error=implicit-function-declaration -DDEBUGVM=0"\
+        LDFLAGS="$LDFLAGS -L/usr/local/lib"\
+        LIBS="$LIBS -lm -lpthread -lexecinfo -liconv"\
+        ;;\
+' mvm || log "Warning: sed patch on mvm failed"
+
+    BUILD_CMD="./mvm -f -- --without-nps --without-vm-display-fbdev --with-libuuid=no --without-alsa --without-pulse"
+    log "Running mvm from root: $BUILD_CMD"
+else
+    log "No mvm; fallback to configure in build/"
+    cd build || { printf "No build/ subdir! ls -l ..\n" | tee -a "$LOGFILE"; exit 1; }
+
+    BUILD_CMD="$VM_ROOT/platforms/unix/config/configure --without-nps --without-vm-display-fbdev --with-libuuid=no --without-alsa --without-pulse \
+    CFLAGS=\"-O2 -pipe -I/usr/local/include -I$SHIM_DIR -Wno-error=incompatible-pointer-types -Wno-error=implicit-function-declaration -DDEBUGVM=0\" \
+    LDFLAGS=\"-L/usr/local/lib\" LIBS=\"-lm -lpthread -lexecinfo -liconv\" && gmake -j$(sysctl -n hw.ncpu)"
+
+    log "Running configure + make from build/: $BUILD_CMD"
+fi
+
+log "=== Starting compile/build ==="
+log "Full build output will be in $LOGFILE"
+
+eval "$BUILD_CMD" >> "$LOGFILE" 2>&1 || {
+    printf "Build failed - full log saved to \n" "$LOGFILE"
+    printf "Last 30 lines of log:\n"
+    tail -n 30 "$LOGFILE"
+    exit 1
+}
+
+log "Compile/build finished successfully"
+
+
+VM_BIN="$VM_ROOT/build.freebsd64x64/squeak.cog.spur/build/squeak"
+
+if [ -z "$VM_BIN" ]; then
+    printf "ERROR: No VM executable found after build!\n"
+    printf "Search manually:\n"
+    find . -type f -executable -ls
+    printf "Check build-log.txt for linker output or errors near the end.\n"
+    exit 1
+fi
+
+VM_BIN=$(realpath "$VM_BIN")
+log "VM binary found: $VM_BIN"
+printf "VM binary found: %s\n" "$VM_BIN"
+
+# Image + desktop (as before)
+IMAGE_DIR="$SQUEAK_HOME/images"
+mkdir -p "$IMAGE_DIR"
+cd "$IMAGE_DIR"
+
+RELEASE="Squeak6.0-22148-64bit"
+BASE="https://files.squeak.org/6.0/$RELEASE"
+
+ZIP_FILE="${RELEASE}.zip"
+URL="https://files.squeak.org/6.0/${RELEASE}/${ZIP_FILE}"
+
+printf "Downloading %s from %s ..." "${ZIP_FILE}" "${URL}"
+wget --no-verbose --show-progress "$URL"
+
+if [ ! -f "$ZIP_FILE" ]; then
+    printf "Error: Download failed (file not found after wget)\n"
+    exit 1
+fi
+
+printf "Unzipping %s ...\n" "${ZIP_FILE}"
+unzip -q -o "$ZIP_FILE"
+
+# Optional: remove the zip file after extraction to save space
+# rm -f "$ZIP_FILE"
+
+printf "Done.\n"
+printf "Image files should now be in: %s\n" "$IMAGE_DIR"
+
+SQUEAK_IMAGE="$IMAGE_DIR/$RELEASE.image"
+
+mkdir -p "$TARGET_APP"
+cat > "$TARGET_APP/Squeak.desktop" << EOF
+[Desktop Entry]
+Name=Squeak Smalltalk
+Exec=$VM_BIN -vm-display-X11 %F
+Icon=utilities-terminal
+Type=Application
+Categories=Development;IDE;
+Comment=Squeak Smalltalk (native FreeBSD VM)
+Terminal=false
+MimeType=application/x-squeak-image;
+EOF
+chmod +x "$TARGET_APP/Squeak.desktop"
+
+# Create launcher wrapper
+LAUNCHER="$SQUEAK_HOME/squeak.sh"
+
+cat > "$LAUNCHER" << EOF
+#!/bin/sh
+# Squeak launcher for native FreeBSD VM
+# Usage: $LAUNCHER [path/to/your.image]
+VM="$VM_BIN"
+IMAGE="\${1:-$SQUEAK_IMAGE}"
+if [ ! -f "\$VM" ]; then
+    printf "Error: VM binary not found at %s\n" "\$VM"
+    printf "Check your build dir or re-run the install script.\n"
+    exit 1
+fi
+if [ ! -f "\$IMAGE" ]; then
+    printf "Error: Image not found at %s\n" "\$IMAGE"
+    printf "Try specifying one: %s /path/to/your.image\n" "$LAUNCHER"
+    exit 1
+fi
+printf "Launching Squeak...\n"
+exec "\$VM" -vm-display-X11 -memory 1024M "\$IMAGE"
+EOF
+
+chmod +x "$LAUNCHER"
+printf "Launcher created: %s\n" "$LAUNCHER"
+printf "You can now run:\n"
+printf "  %s\n" "$LAUNCHER"
+printf "or\n"
+printf "  %s /path/to/another.image\n" "$LAUNCHER"
+printf "Done! Test: %s -vm-display-X11 \"%s\"\n" "$VM_BIN" "$SQUEAK_IMAGE"
+printf "Build log saved to: %s\n" "$LOGFILE"

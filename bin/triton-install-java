@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+# Install Maven and Gradle if missing
+for pkg in openjdk25 maven gradle; do
+  if ! command -v "$pkg" >/dev/null 2>&1; then
+    printf "Installing %s...\n" "$pkg"
+    doas pkg install -y "$pkg"
+  else
+    printf "$pkg is already installed."
+  fi
+done
+
+# Set environment variables if not already in profile
+if ! grep -q "JAVA_HOME" ~/.bashrc; then
+  printf "Configuring JAVA_HOME in ~/.bashrc\n"
+  cat >> ~/.bashrc <<'EOF'
+
+# Java development environment
+export JAVA_HOME=/usr/local/openjdk21
+export PATH=$JAVA_HOME/bin:$PATH
+EOF
+fi
+
+printf "Java development environment setup complete!\n"

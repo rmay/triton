@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="None" />
+      <link rel="shortcut icon" href="img/favicon.ico" />
+    <title>Archon Documentation</title>
+    <link rel="stylesheet" href="css/theme.css" />
+    <link rel="stylesheet" href="css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Home";
+        var mkdocs_page_input_path = "index.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="." class="icon icon-home"> Archon Documentation
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Home</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-is-archon">What is Archon?</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#brief-install-instructions-for-the-busy-developer">Brief install instructions for the busy developer</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#whats-in-the-box">What's in the box?</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="hardwarereqs/">Hardware Requirements</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="shortcuts/">Shortcuts</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="screenshots/">Screenshots</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href=".">Archon Documentation</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Home</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="welcome">Welcome!</h1>
+<h2 id="what-is-archon">What is Archon?</h2>
+<p>I was inspired by DHH's <a href="https://omarchy.org/">Omarchy</a> early versions, pre-ISO, when it was a collection of Bash scripts.</p>
+<p>While I wanted <a href="https://archlinux.org/">Arch</a>, I didn't want Wayland, at all.</p>
+<p>I took his ideas and started my own project.</p>
+<p>Archon uses <a href="https://archlinux.org/">Arch</a>, but instead of Wayland, I'm using X11 and <a href="https://www.windowmaker.org/">Window Maker</a>.</p>
+<p>This is not for the casual computer user, this is for people that like computers as tinkering machines but still want get stuff done.</p>
+<p>It comes pre-installed with shells, a few development tools, Docker, Chromium, Brave, LibreOffice, basically everything needed to get started developing.</p>
+<p>It's a mix of TUI and GUI elements, wrangled together to present a more cohesive whole than what comes out of the box.</p>
+<p>If you want something much more polished, check out DHH's <a href="https://omakub.org/">Omakub</a> or <a href="https://omarchy.org/">Omarchy</a>. Both are stellar projects and I promise you won't hurt my feelings if you choose one or the other.</p>
+<p>Still with me? Let's do this.</p>
+<h2 id="brief-install-instructions-for-the-busy-developer">Brief install instructions for the busy developer</h2>
+<p>Burn the Arch iso to a thumbdrive.</p>
+<p>Here the installation settings that have been worked for me: </p>
+<p><code>$ archinstall</code></p>
+<ul>
+<li>Archinstall Language -- default  </li>
+<li>Locales -- default  </li>
+<li>Mirrors and repositories -&gt; Select region -&gt; United States  </li>
+<li>Disk configuration -&gt; Partitioning -&gt; Use a best-effort default partition layout -&gt; Filesystem -&gt; btrfs -&gt; Use BTRFS subvolumes with a default structure -&gt; Yes -&gt; Use Compression  </li>
+<li>Swap -- default  </li>
+<li>Bootloader -- default  </li>
+<li>Unified kernel image -- default  </li>
+<li>Hostname -&gt; change to your hostname  </li>
+<li>Root password -&gt; change to what you want  </li>
+<li>User account -&gt; Add your user account here -&gt; make yourself a superuser  </li>
+<li>Profile -- default  </li>
+<li>Audio -&gt; pipewire  </li>
+<li>Kernels -- default  </li>
+<li>Network configuration -&gt; Use NetworkManager (this has worked for me the best)  </li>
+<li>Additional packages -&gt; <code>/wget</code>  </li>
+<li>Timezone -&gt; set to your timezone  </li>
+<li>Automatic time sync (NTP -- default)  </li>
+</ul>
+<p>After rebooting into your fresh Arch install, run this command (that's a capital "o", not a zero):<br />
+<code>wget -qO- https://rmay.github.io/archon/archon | bash</code></p>
+<p>This will set up the base system with all the default settings. Once that's done, the system will reboot and present you with a login screen. Login again with your Arch user, and welcome to the cutting edge of retro-future 90's!</p>
+<p>I've been mostly developing on a VM, but I have tried it on real hardware and I am slowly making it my primary non-work development environment. Just one more Bash script, bro.</p>
+<h2 id="whats-in-the-box">What's in the box?</h2>
+<p>Here's a partial list of what it comes with out of the box:</p>
+<ul>
+<li>Window Maker and some extras</li>
+<li>A curated Window Maker menu</li>
+<li>Window Maker set up for 4 workspaces. You access them quickly by <code>Super+&lt;n&gt;</code> or by using the mouse wheel on the root window. The clip in the upper right corner shows the current workspace and lets you move through them by clicking the arrows. You can move a window to a workspace with <code>Super+ctrl+&lt;n&gt;</code></li>
+<li>Four terminals: Ghostty, Alacritty, xterm, and st, with the last one being built from source during install. The default terminal is currently Ghostty.</li>
+<li>Two browsers: Brave and Chromium, with the latter the default.</li>
+<li>Three file managers: Nautilus, Thunar, and Ranger in a terminal.</li>
+<li>Development tools: VSCode, neovim using LazyVim for the defaults, gVim, and Doom Emacs.</li>
+<li>Docker and a TUI with lazydocker</li>
+<li>LibreOffice</li>
+<li>Two pdf viewers: Evince and xPdf</li>
+<li>Loqseq</li>
+<li>Nextcloud</li>
+<li>Gimp</li>
+<li>VLC</li>
+<li>mpv</li>
+<li>Rofi and dmenu</li>
+</ul>
+<p>I've also taken DHH's command line tool and changed it.</p>
+<p>In the terminal, run: <code>archon</code></p>
+<ul>
+<li>You can set the default terminal between the ones listed, change the curated theme to one I've copied from DHH, and install one of the three programming languages I'm currently supporting as extras: Go, Ruby, Java, SBCL with Quicklisp, and Squeak. C, C++, and Python are already there, with versions 20.1.8, 15.1.1, and 3.13.5 respectively, as of this writing (September 2025). I'm using <a href="https://mise.jdx.dev/">mise-en-place</a> to manage Ruby and Go. First time using it and I'm interested to see how it shakes out.</li>
+</ul>
+<p>In addition to the default keyboard shortcuts offered by Window Maker, I'm using xbindkeys.</p>
+<p>A few shortcuts:</p>
+<ul>
+<li><code>Super+Return</code> starts the default terminal.</li>
+<li><code>Super+Return+Shift</code> starts xterm, just in case.</li>
+<li><code>Super+~</code> starts dmenu</li>
+<li><code>Super+space</code> starts rofi</li>
+</ul>
+<p>See <a href="shortcuts/">Shortcuts</a> for more details.</p>
+<h1 id="but-why">But, why?</h1>
+<p>I want a stable, repeatable experience in Linux. I've tried a bunch of stuff over the years, but nothing really gelled. I've liked things from all sorts of places, but never in a complete package. And while not perfect, I have a fondness for the 90's computer aesthetic. And I wanted to do just do a thing.</p>
+<ul>
+<li>Arch for the packages and a rolling update to keep things fresh.</li>
+<li>X11 because it is still a better system than Wayland. Not flashier, but battle-hardened and proven.</li>
+<li>Window Maker because the asthetic is solid, it's lightweight, and I like it, despite being so old.</li>
+<li>C/C++ to compile all the things.</li>
+<li>Ruby because it's a great language.</li>
+<li>Go because it's the best get stuff done language I've found.</li>
+<li>Squeak Smalltalk because the concepts are from a future we could have had.</li>
+<li>Java because it runs everything.</li>
+<li>SBCL because if you don't have some half-started Common Lisp app buried somewhere are you really trying?</li>
+<li>Neovim because it's hip.</li>
+<li>Doom Emacs because it's not.</li>
+<li>LazyDocker because the desktop version is really heavy and the plain cli tool is a pain when you only use it occasionally.</li>
+<li>LazyGit because it's really slick and easy to use.</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="hardwarereqs/" class="btn btn-neutral float-right" title="Hardware Requirements">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+    
+      <span><a href="hardwarereqs/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = ".";</script>
+    <script src="js/theme_extra.js"></script>
+    <script src="js/theme.js"></script>
+      <script src="search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2025-09-22 20:03:35.200723+00:00
+-->

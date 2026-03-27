@@ -1,0 +1,6 @@
+#!/bin/sh
+if command -v logseq >/dev/null 2>&1; then
+    exec logseq "$@"
+else
+    notify-send "Logseq" "Logseq is not installed. Install it via pkg or ports." --icon=dialog-error
+fi

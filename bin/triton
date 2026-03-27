@@ -1,0 +1,105 @@
+#!/bin/sh
+set -eu
+
+TRITON_VERSION=$(git -C ~/.local/share/triton describe --tags --abbrev=0 2>/dev/null || true)
+PATH="$PATH:$HOME/.local/share/triton/bin:$HOME/.local/bin"
+
+show_ascii_art() {
+  clear
+  if command -v tte >/dev/null 2>&1; then
+    tte -i ~/.local/share/triton/logo.txt --frame-rate 640 burn --burn-colors ffffff fff75d fe650d 8a003c 510100 --final-gradient-stops 00c3ff ffff1c --final-gradient-steps 12
+  else
+    cat ~/.local/share/triton/logo.txt
+  fi
+  printf "                                                                          $TRITON_VERSION\n"
+}
+
+ack_command() {
+  gum spin --spinner "globe" --title "Done!" -- sleep 1
+}
+
+open_manual() {
+  daemon waterfox --new-window --app="https://rmay.github.io/triton/" >/dev/null 2>&1
+  clear
+}
+
+main_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "Theme" "Programming" "Terminal" "Setup" "Update" "Fix Icons" "Manual" "About" "Exit" \
+    | gum choose --header "") || exit 0
+  case "$choice" in
+    Theme)       theme_menu ;;
+    Programming) programming_languages_menu ;;
+    Terminal)    terminal_menu ;;
+    Update)      update_menu ;;
+    "Fix Icons") triton-fix-wm-icons ;;
+    Manual)      open_manual; main_menu ;;
+    About)       triton-terminal -o font.size=9 -e sh -c 'fastfetch; read dummy'; main_menu ;;
+    Exit)        clear && exit 0 ;;
+  esac
+}
+
+update_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "Triton" "Desktop apps" "Back" \
+    | gum choose --header="Update") || main_menu
+  case "$choice" in
+    Triton)        triton-update; ack_command; main_menu ;;
+    Back)          main_menu ;;
+  esac
+}
+
+theme_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "Pick" "Next background" "Back" \
+    | gum choose --header="Theme") || main_menu
+  case "$choice" in
+    Pick)              triton-theme-menu; ack_command; theme_menu ;;
+    "Next background") triton-theme-bg-next; ack_command; theme_menu ;;
+    Back)              main_menu ;;
+  esac
+}
+
+install_theme_prompt() {
+  url=$(gum input --placeholder="Git repo URL for theme" --header="")
+  if [ -n "$url" ]; then
+    triton-theme-install "$url"
+  fi
+  theme_menu
+}
+
+remove_theme_prompt() {
+  theme=$(gum input --placeholder="Theme name" --header="")
+  if [ -n "$theme" ]; then
+    triton-theme-remove "$theme"
+  fi
+  theme_menu
+}
+
+
+programming_languages_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "Java 25" "Squeak 6.0" "SBCL+quicklisp" "Elixir/Erlang 1.19-otp-28" "Pyhton latest" "Back" \
+    | gum choose --header="Programming Languages") || main_menu
+  case "$choice" in
+    "Java 25")                  triton-install-java; ack_command; main_menu ;;
+    "Squeak 6.0")               triton-install-squeak; ack_command; main_menu ;;
+    "SBCL+quicklisp")           triton-install-sbcl; ack_command; main_menu ;;
+    "Elixir/Erlang 1.19-otp-28") triton-install-elixir; ack_command; main_menu ;;
+    "Pyhton latest")            triton-install-python; ack_command; main_menu ;;
+    Back)                       main_menu ;;
+  esac
+}
+
+terminal_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "xterm" "urxvt" "Back" \
+    | gum choose --header="Terminal") || main_menu
+  case "$choice" in
+    xterm)     triton-terminal-set xterm; ack_command; main_menu ;;
+    urxvt)     triton-terminal-set urxvt; ack_command; main_menu ;;
+    Back)      main_menu ;;
+  esac
+}
+
+main_menu

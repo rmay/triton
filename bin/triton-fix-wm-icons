@@ -1,0 +1,163 @@
+#!/bin/sh
+
+# Automatically adds missing dock icons for all running X11 apps in Window Maker.
+#
+# Usage:
+#   ./triton-fix-wm-icons         # scan all running windows
+#   ./triton-fix-wm-icons firefox # fix a specific app by name
+#
+# Dependencies: xprop, wmctrl or xdotool, imagemagick (optional, for svg->png conversion)
+
+set -eu
+
+WMATTR="$HOME/GNUstep/Defaults/WMWindowAttributes"
+ICON_DIR="$HOME/GNUstep/Library/Icons"
+SPECIFIC_APP=""
+
+ICON_SEARCH_DIRS="
+$HOME/GNUstep/Library/Icons
+/usr/share/pixmaps
+/usr/share/icons/hicolor/48x48/apps
+/usr/share/icons/hicolor/32x32/apps
+/usr/share/icons/hicolor/scalable/apps
+/usr/share/icons/Adwaita/48x48/apps
+/usr/share/app-install/icons
+/usr/local/share/pixmaps
+"
+
+# ── Argument parsing ────────────────────────────────────────────────────────
+for arg in "$@"; do
+  case "$arg" in
+    --help)
+      printf "Usage: %s [app-name]\n" "$0"
+      printf "  app-name    Only process a specific app (uses WM_CLASS match)\n"
+      exit 0 ;;
+    *) SPECIFIC_APP="$arg" ;;
+  esac
+done
+
+# ── Helpers ─────────────────────────────────────────────────────────────────
+
+ok()   { printf "  ✓ %s\n" "$*"; }
+add()  { printf "  + %s\n" "$*"; }
+warn() { printf "  ? %s\n" "$*"; }
+
+to_lower() { printf "%s" "$1" | tr '[:upper:]' '[:lower:]'; }
+
+to_upper_first() {
+  first=$(printf "%s" "$1" | cut -c1 | tr '[:lower:]' '[:upper:]')
+  rest=$(printf "%s" "$1" | cut -c2-)
+  printf "%s%s" "$first" "$rest"
+}
+
+find_icon() {
+  name="$1"
+  lower=$(to_lower "$name")
+  upper=$(to_upper_first "$name")
+
+  for dir in $ICON_SEARCH_DIRS; do
+    [ -d "$dir" ] || continue
+    for variant in "$name" "$lower" "$upper"; do
+      for ext in png xpm svg; do
+        path="$dir/$variant.$ext"
+        if [ -f "$path" ]; then
+          if [ "$ext" = "svg" ] && command -v convert >/dev/null 2>&1; then
+            png_out="$ICON_DIR/${variant}.png"
+            mkdir -p "$ICON_DIR"
+            convert -background none "$path" -resize 48x48 "$png_out" 2>/dev/null \
+              && printf "%s" "$png_out" && return
+          else
+            printf "%s" "$path" && return
+          fi
+        fi
+      done
+    done
+  done
+
+  found=$(find /usr/share/icons/hicolor \( -iname "${lower}.png" -o -iname "${lower}.xpm" \) 2>/dev/null \
+    | sort -t/ -k6 -rn | head -1)
+  [ -n "$found" ] && printf "%s" "$found"
+}
+
+already_configured() {
+  [ -f "$WMATTR" ] && grep -q "\"$1\"" "$WMATTR"
+}
+
+ensure_wmattr() {
+  mkdir -p "$(dirname "$WMATTR")"
+  if [ ! -f "$WMATTR" ]; then
+    printf "{}\n" > "$WMATTR"
+  fi
+  if ! grep -q '^{' "$WMATTR" 2>/dev/null; then
+    printf "{}\n" > "$WMATTR"
+  fi
+}
+
+inject_entry() {
+  cls="$1"
+  icon_path="$2"
+  icon_name=$(basename "$icon_path")
+
+  if [ "$(dirname "$icon_path")" != "$ICON_DIR" ]; then
+    mkdir -p "$ICON_DIR"
+    cp "$icon_path" "$ICON_DIR/$icon_name"
+  fi
+
+  tmp=$(mktemp)
+  sed "s|^}$|  \"$cls\" = { Icon = \"$icon_name\"; MiniaturizePixmap = \"$icon_name\"; };\n}|" "$WMATTR" > "$tmp"
+  mv "$tmp" "$WMATTR"
+  add "$cls → $icon_name"
+}
+
+get_running_classes() {
+  if xprop -root _NET_CLIENT_LIST >/dev/null 2>&1; then
+    xprop -root _NET_CLIENT_LIST \
+      | grep -o '0x[0-9a-f]*' \
+      | while IFS= read -r wid; do
+          xprop -id "$wid" WM_CLASS 2>/dev/null
+        done \
+      | grep -o '"[^"]*"' \
+      | tr -d '"' \
+      | awk 'NR%2==0'
+  elif command -v wmctrl >/dev/null 2>&1; then
+    wmctrl -lx | awk '{print $3}' | cut -d. -f2
+  else
+    printf "Error: neither xprop+_NET_CLIENT_LIST nor wmctrl available.\n" >&2
+    exit 1
+  fi
+}
+
+# ── Main ─────────────────────────────────────────────────────────────────────
+printf "Window Maker icon fixer\n"
+printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+printf "\n"
+
+ensure_wmattr
+
+if [ -n "$SPECIFIC_APP" ]; then
+  classes="$SPECIFIC_APP"
+else
+  classes=$(get_running_classes | sort -u)
+fi
+
+printf "%s" "$classes" | while IFS= read -r cls; do
+  [ -z "$cls" ] && continue
+
+  if already_configured "$cls"; then
+    ok "$cls — already in WMWindowAttributes"
+    continue
+  fi
+
+  icon=$(find_icon "$cls")
+
+  if [ -n "$icon" ]; then
+    inject_entry "$cls" "$icon"
+  else
+    warn "$cls — no icon found (add manually to $ICON_DIR/)"
+  fi
+done
+
+printf "\n"
+printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+printf "  Reloading Window Maker config...\n"
+wmaker --restart 2>/dev/null && printf "  ✓ Done.\n" || printf "  ! Could not signal wmaker — restart manually.\n"

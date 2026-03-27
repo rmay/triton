@@ -1,0 +1,4 @@
+#!/bin/sh
+
+cmd=$(dmenu_path | dmenu -i -p "Run:")
+[ -n "$cmd" ] && exec $cmd

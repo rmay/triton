@@ -1,0 +1,6 @@
+# Technicolor dreams
+force_color_prompt=yes
+color_prompt=yes
+
+# Simple prompt with path in the window/pane title and caret for typing line
+PS1="\[\e]0;\w\a\]\[\e[38;5;178m\]\h\[\e[0m\]:\w\$ "

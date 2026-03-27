@@ -1,0 +1,51 @@
+#!/bin/sh
+set -e
+
+# Function to check if a package is installed
+is_installed() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+printf "Checking for SBCL...\n"
+
+# Install SBCL if not present
+if ! is_installed sbcl; then
+  printf "Installing SBCL (Steel Bank Common Lisp)...\n"
+  doas pkg install -y sbcl
+else
+  printf "SBCL is already installed.\n"
+fi
+
+# Install curl if missing (needed to fetch quicklisp)
+if ! is_installed curl; then
+  printf "Installing curl...\n"
+  doas pkg install -y curl
+fi
+
+# Quicklisp installation directory
+QUICKLISP_DIR="$HOME/quicklisp"
+
+if [ ! -d "$QUICKLISP_DIR" ]; then
+  printf "Installing Quicklisp...\n"
+
+  # Download quicklisp installer
+  curl -O https://beta.quicklisp.org/quicklisp.lisp
+
+  # Run SBCL to install quicklisp
+  sbcl --non-interactive --load quicklisp.lisp \
+       --eval '(quicklisp-quickstart:install)' \
+       --eval '(ql:add-to-init-file)'
+
+  # Cleanup
+  rm -f quicklisp.lisp
+
+  printf "Quicklisp installed in %s\n" "$QUICKLISP_DIR"
+else
+  printf "Quicklisp is already installed in %s\n" "$QUICKLISP_DIR"
+fi
+
+# Test installation
+printf "Testing Quicklisp setup...\n"
+sbcl --non-interactive --eval '(require :quicklisp)' --eval '(quit)'
+
+printf "SBCL + Quicklisp installation complete!\null"

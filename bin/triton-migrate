@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+# Where we store an empty file for each migration that has already been performed.
+STATE_DIR="$HOME/.local/state/triton/migrations"
+mkdir -p "$STATE_DIR"
+
+# Run any pending migrations
+for file in "$HOME/.local/share/triton/migrations/"*.sh; do
+    filename=$(basename "$file")
+    if [ ! -f "$STATE_DIR/$filename" ]; then
+        printf "\n\033[32mRunning migration (%s)\033[0m\n" "${filename%.sh}"
+        doas sh -c '. '"$file"
+        touch "$STATE_DIR/$filename"
+    fi
+done

@@ -1,0 +1,121 @@
+#!/bin/sh
+set -e
+
+printf '\n=== asdf-vm + Erlang/Elixir Setup (FreeBSD + Triton/bash) ===\n\n'
+
+# ============================================================================
+# ONE-TIME asdf integration into Triton envs file
+# ============================================================================
+ENVS_FILE="$HOME/.local/share/triton/default/bash/envs"
+ASDF_SHIMS_LINE='export PATH="$HOME/.asdf/shims:$PATH"'
+ASDF_KERL_LINE='export KERL_CONFIG_OPTIONS="--with-ssl=/usr/local --without-javac"'
+ASDF_SOURCE_LINE='if [ -f "$HOME/.asdf/asdf.sh" ]; then . "$HOME/.asdf/asdf.sh"; fi'
+
+if [ ! -f "$ENVS_FILE" ]; then
+    printf 'Creating missing envs file: %s\n' "$ENVS_FILE"
+    mkdir -p "$(dirname "$ENVS_FILE")"
+    touch "$ENVS_FILE"
+fi
+
+if ! grep -F "$ASDF_SHIMS_LINE" "$ENVS_FILE" >/dev/null 2>&1; then
+    printf '\n>>> Adding asdf-vm setup to %s <<<\n' "$ENVS_FILE"
+    {
+        printf '\n# === Personal asdf-vm setup for Erlang/Elixir ===\n'
+        printf '%s\n' "$ASDF_SHIMS_LINE"
+        printf '%s\n' "$ASDF_KERL_LINE"
+        printf '%s\n' "$ASDF_SOURCE_LINE"
+    } >> "$ENVS_FILE"
+
+    printf '\nLines added successfully.\n'
+    printf '============================================================\n'
+    printf 'IMPORTANT: asdf will NOT be available in this terminal yet!\n'
+    printf 'Please do the following:\n'
+    printf '  1. Open a NEW terminal tab or window\n'
+    printf '  2. Re-run this script in the new terminal\n'
+    printf '     (./%s)\n' "$(basename "$0")"
+    printf '============================================================\n\n'
+    exit 0
+else
+    printf 'asdf-vm lines already present in %s — good to go\n' "$ENVS_FILE"
+fi
+
+# ============================================================================
+# From here on: assumes asdf is in PATH (new terminal required if just added)
+# ============================================================================
+
+# 1. Install/update asdf if needed
+if [ ! -d "$HOME/.asdf" ]; then
+    printf 'Cloning asdf-vm...\n'
+    git clone --branch v0.18.1 --depth 1 https://github.com/asdf-vm/asdf.git "$HOME/.asdf" || {
+        printf 'Error: git clone failed\n' >&2
+        exit 1
+    }
+else
+    printf 'asdf already exists — updating to v0.18.1...\n'
+    ( cd "$HOME/.asdf" && git fetch && git checkout v0.18.1 ) || {
+        printf 'Warning: update failed — continuing\n' >&2
+    }
+fi
+
+# Check if asdf is available in current shell
+if ! command -v asdf >/dev/null 2>&1; then
+    printf '\nERROR: asdf command not found.\n'
+    printf 'You likely need to open a NEW terminal after the lines were added.\n'
+    printf '  • Close this terminal\n'
+    printf '  • Open a new one\n'
+    printf '  • Re-run the script\n\n'
+    exit 1
+fi
+
+# Build the new Go version
+cd "$HOME/.asdf"
+make
+cp "$HOME/.asdf/asdf" "$HOME/.asdf/bin/"
+
+printf 'asdf is available! Version: %s\n\n' "$(asdf --version)"
+
+# 4. Add plugins (idempotent)
+printf 'Adding plugins...\n'
+asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git 2>/dev/null || printf 'erlang plugin already added\n'
+asdf plugin add elixir  https://github.com/asdf-vm/asdf-elixir.git  2>/dev/null || printf 'elixir plugin already added\n'
+
+# 5. Install versions
+printf '\nInstalling Erlang 28.4 (may take 10-20 min)...\n'
+asdf install erlang 28.4 || {
+    printf '\nErlang install failed.\n' >&2
+    printf 'Common FreeBSD fixes:\n'
+    printf '  sudo pkg install -y autoconf automake gcc gmake libxslt ncurses openssl pkgconf\n'
+    printf '  export KERL_CONFIGURE_OPTIONS="--with-ssl=/usr/local --without-javac"\n'
+    printf 'Then retry: asdf install erlang 28.4\n\n' >&2
+    exit 1
+}
+
+printf '\nInstalling Elixir 1.19-otp-28...\n'
+asdf install elixir 1.19-otp-28 || {
+    printf 'Elixir install failed — see error above\n' >&2
+    exit 1
+}
+
+# 6. Set global defaults
+printf '\nSetting global versions...\n'
+asdf global erlang 28.4
+asdf global elixir 1.19-otp-28
+
+# 7. Verify
+printf '\n=== Setup Complete ===\n\n'
+printf 'Installed versions:\n'
+asdf current
+printf '\nQuick checks:\n'
+printf 'Erlang:  '
+erl -noshell -eval 'erlang:display(erlang:system_info(otp_release)), halt().' 2>/dev/null || printf '(erl not ready yet)\n'
+printf 'Elixir:  '
+elixir --version 2>/dev/null || printf '(elixir not ready yet)\n'
+printf '\n'
+
+printf 'Next steps:\n'
+printf '  • Try: iex\n'
+printf '  • For projects: cd myproject && asdf local elixir 1.19-otp-28\n'
+printf '\nIf builds fail due to missing deps, install them first:\n'
+printf '  sudo pkg install -y autoconf automake gcc gmake libxslt ncurses openssl pkgconf\n\n'
+
+printf 'All done! Happy coding with Erlang & Elixir.\n'
