@@ -1,1 +1,1 @@
-eval "$(fetch -qo - https://vapor.solarvoid.com/russell/triton/raw/branch/master/boot.sh)"
+eval "$(fetch -qo - https://raw.githubusercontent.com/rmay/triton/refs/heads/master/boot.sh)"

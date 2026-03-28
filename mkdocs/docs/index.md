@@ -6,7 +6,7 @@ I was inspired by DHH's [Omarchy](https://omarchy.org/) early versions, pre-ISO,
 
 I started with [Archon](https://github.com/rmay/archon) using [Arch](https://archlinux.org/) and [Window Maker](https://www.windowmaker.org/).
 
-After experimenting with that setup, I decided the concept should work as well for FreeBSD. Lessons learned are applied here.
+After experimenting with that setup, I decided the concept should work as well for [FreeBSD](https://www.freebsd.org/). Lessons learned are applied here.
 
 This is not for the casual computer user, this is for people that like computers as tinkering machines but still want to get stuff done.
 
@@ -27,7 +27,7 @@ Installing FreeBSD itself is beyond the scope of this documentation.
 After rebooting into your fresh FreeBSD install, run these commands.
 
 ```sh
-$ fetch https://vapor.solarvoid.com/russell/triton/raw/branch/master/triton-install
+$ fetch https://rmay.github.io/triton/triton-install
 $ chmod +x triton-install
 $ su
 # ./triton-install
