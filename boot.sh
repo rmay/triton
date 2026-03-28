@@ -85,7 +85,7 @@ mkdir -p "$TARGET_HOME/.local/share"
 
 # Remove any old checkout and clone as root, then fix ownership
 rm -rf "$TRITON_DIR"
-git clone https://github.com/rmay/triton/triton.git "$TRITON_DIR" >/dev/null
+git clone https://github.com/rmay/triton.git "$TRITON_DIR" >/dev/null
 
 # Use custom branch if instructed
 if [ -n "${TRITON_REF:-}" ]; then
