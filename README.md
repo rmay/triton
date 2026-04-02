@@ -29,7 +29,9 @@ As part of the install, make sure you've added your account to the wheel group.
 
 ## Start the Triton installer
 
-> fetch https://rmay.github.io/triton/triton-install 
-> su
-> chmod +x triton-install
-> ./triton-install
+```
+$ fetch https://rmay.github.io/triton/triton-install
+$ chmod +x triton-install
+$ su
+# ./triton-install
+```
