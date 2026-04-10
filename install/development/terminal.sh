@@ -13,11 +13,12 @@ for pkg in \
   xclip fastfetch btop nano py311-ranger \
   tldr plocate the_silver_searcher \
   less whois bash bash-completion \
-  xterm tmux git \
+  xterm tmux git rsync \
   libX11 libXft libXext \
   rxvt-unicode urxvt-font-size \
   password-store ncdu gum \
-  imbt-firmware virtual_oss
+  imbt-firmware virtual_oss \
+  neomutt
 do
   install_pkg_if_missing "$pkg"
 done
