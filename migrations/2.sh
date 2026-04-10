@@ -1,7 +1,6 @@
 #!/bin/sh
-# Migration 2 + Nice Prompt + Auto tmux on SSH
-# Configures Triton PATH, colorful prompt, and auto-tmux for SSH sessions.
-# Run as yourself (no doas/root needed).
+# Full SSH login setup: Triton PATH + Nice colorful prompt + Auto tmux + Colored ls
+# Fixed TERM handling and added colored ls for FreeBSD
 
 set -e
 
@@ -27,7 +26,7 @@ else
     printf "==> triton PATH already in %s, skipping\n" "$PROFILE"
 fi
 
-# Bash-specific: source .profile from .bash_profile
+# Bash bridge
 case "$TARGET_SHELL" in
     */bash)
         BASH_PROFILE="${TARGET_HOME}/.bash_profile"
@@ -39,7 +38,6 @@ case "$TARGET_SHELL" in
         fi
         ;;
     */csh|*/tcsh)
-        # csh/tcsh use ~/.login
         LOGIN="${TARGET_HOME}/.login"
         if ! grep -qF 'triton/bin' "$LOGIN" 2>/dev/null; then
             printf 'setenv PATH "$HOME/.local/share/triton/bin:/usr/local/GNUstep/System/Applications:$PATH"\n' >> "$LOGIN"
@@ -50,46 +48,77 @@ case "$TARGET_SHELL" in
         ;;
 esac
 
-# ====================== 2. Nice Colorful Prompt + TERM fix ======================
+# ====================== 2. Smart Colorful Prompt + TERM fix ======================
 COLOR_PROMPT='
-# === Nice colorful prompt + 256-color support ===
+# === Smart colorful prompt + safe TERM upgrade ===
 if [ -n "$PS1" ]; then
-    # Upgrade TERM for better color support (works with most terminals)
+    # Safe TERM upgrade — only add -256color if missing
     case "$TERM" in
-        xterm*|screen*|tmux*)
-            export TERM="${TERM}-256color" 2>/dev/null || true
+        *-256color|*-256colours)
+            ;;
+        xterm*|screen*|tmux*|rxvt*)
+            export TERM="${TERM}-256color"
             ;;
     esac
 
-    # Clean, modern prompt: green user@host : blue path $
+    # Nice clean prompt
     PS1="\[\e[32m\]\u@\[\e[36m\]\h\[\e[0m\]:\[\e[34m\]\w\[\e[0m\]\$ "
 fi
 '
 
-if ! grep -qF 'Nice colorful prompt' "$PROFILE" 2>/dev/null; then
+if ! grep -qF 'Smart colorful prompt' "$PROFILE" 2>/dev/null; then
     printf '%s\n' "$COLOR_PROMPT" >> "$PROFILE"
-    printf "==> Added colorful prompt + TERM fix to %s\n" "$PROFILE"
+    printf "==> Added smart colorful prompt + TERM fix to %s\n" "$PROFILE"
 else
     printf "==> Colorful prompt already in %s, skipping\n" "$PROFILE"
+fi
+
+# Add to .bash_profile too (for bash)
+if [ "$TARGET_SHELL" = */bash ] || [ -f "${TARGET_HOME}/.bash_profile" ]; then
+    BASH_PROFILE="${TARGET_HOME}/.bash_profile"
+    if [ -f "$BASH_PROFILE" ] && ! grep -qF 'Smart colorful prompt' "$BASH_PROFILE" 2>/dev/null; then
+        printf '%s\n' "$COLOR_PROMPT" >> "$BASH_PROFILE"
+        printf "==> Added smart colorful prompt to %s\n" "$BASH_PROFILE"
+    fi
+fi
+
+# ====================== 3. Colored ls (FreeBSD style) + useful aliases ======================
+LS_COLORS='
+# === Colored ls for FreeBSD + handy aliases ===
+if [ -n "$PS1" ]; then
+    export CLICOLOR=1
+    # Nice readable color scheme (directories bright blue, executables green, etc.)
+    export LSCOLORS="ExGxFxdxCxDxDxhbadExEx"
+
+    # Aliases (work in both bash and sh)
+    alias ls="ls -G"          # -G enables colors on FreeBSD
+    alias ll="ls -lG"         # long listing with colors
+    alias la="ls -laG"        # show hidden files too
+fi
+'
+
+if ! grep -qF 'Colored ls for FreeBSD' "$PROFILE" 2>/dev/null; then
+    printf '%s\n' "$LS_COLORS" >> "$PROFILE"
+    printf "==> Added colored ls + aliases to %s\n" "$PROFILE"
+else
+    printf "==> Colored ls already configured in %s, skipping\n" "$PROFILE"
 fi
 
 # Also add to .bash_profile for bash
 if [ "$TARGET_SHELL" = */bash ] || [ -f "${TARGET_HOME}/.bash_profile" ]; then
     BASH_PROFILE="${TARGET_HOME}/.bash_profile"
-    if [ -f "$BASH_PROFILE" ] && ! grep -qF 'Nice colorful prompt' "$BASH_PROFILE" 2>/dev/null; then
-        printf '%s\n' "$COLOR_PROMPT" >> "$BASH_PROFILE"
-        printf "==> Added colorful prompt to %s\n" "$BASH_PROFILE"
+    if [ -f "$BASH_PROFILE" ] && ! grep -qF 'Colored ls for FreeBSD' "$BASH_PROFILE" 2>/dev/null; then
+        printf '%s\n' "$LS_COLORS" >> "$BASH_PROFILE"
+        printf "==> Added colored ls to %s\n" "$BASH_PROFILE"
     fi
 fi
 
-# ====================== 3. Auto tmux on SSH only ======================
+# ====================== 4. Auto tmux on SSH only ======================
 TMUX_AUTO='
-# === Auto-start or attach tmux only for SSH sessions ===
+# === Auto tmux only for SSH sessions ===
 if [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -n "$SSH_TTY" ]; then
-    # Shared session name (change to "$(whoami)" or "$(hostname -s)" if you want per-user/per-host)
     SESSION_NAME="main"
 
-    # Attach if session exists, otherwise create new
     if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
         exec tmux attach-session -t "$SESSION_NAME"
     else
@@ -98,17 +127,17 @@ if [ -n "$PS1" ] && [ -z "$TMUX" ] && [ -n "$SSH_TTY" ]; then
 fi
 '
 
-if ! grep -qF 'Auto-start or attach tmux' "$PROFILE" 2>/dev/null; then
+if ! grep -qF 'Auto tmux only for SSH' "$PROFILE" 2>/dev/null; then
     printf '%s\n' "$TMUX_AUTO" >> "$PROFILE"
     printf "==> Added auto-tmux on SSH to %s\n" "$PROFILE"
 else
     printf "==> Auto-tmux already configured in %s, skipping\n" "$PROFILE"
 fi
 
-# Also add to .bash_profile for bash
+# Add to .bash_profile too
 if [ "$TARGET_SHELL" = */bash ] || [ -f "${TARGET_HOME}/.bash_profile" ]; then
     BASH_PROFILE="${TARGET_HOME}/.bash_profile"
-    if [ -f "$BASH_PROFILE" ] && ! grep -qF 'Auto-start or attach tmux' "$BASH_PROFILE" 2>/dev/null; then
+    if [ -f "$BASH_PROFILE" ] && ! grep -qF 'Auto tmux only for SSH' "$BASH_PROFILE" 2>/dev/null; then
         printf '%s\n' "$TMUX_AUTO" >> "$BASH_PROFILE"
         printf "==> Added auto-tmux to %s\n" "$BASH_PROFILE"
     fi
