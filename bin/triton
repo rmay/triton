@@ -108,7 +108,7 @@ setup_menu() {
   choice=$(printf '%s\n' "Sublime Text Editor" "Back" \
     | gum choose --header="Setup") || main_menu
   case "$choice" in
-    "JSublime Text Editor")     triton-install-sublime ack_command; main_menu ;;
+    "Sublime Text Editor")     triton-install-sublime ack_command; main_menu ;;
     Back)                       main_menu ;;
   esac
 }
