@@ -31,6 +31,7 @@ main_menu() {
     Theme)       theme_menu ;;
     Programming) programming_languages_menu ;;
     Terminal)    terminal_menu ;;
+    Setup)       setup_menu ;;
     Update)      update_menu ;;
     "Fix Icons") triton-fix-wm-icons ;;
     Manual)      open_manual; main_menu ;;
@@ -99,6 +100,16 @@ terminal_menu() {
     xterm)     triton-terminal-set xterm; ack_command; main_menu ;;
     urxvt)     triton-terminal-set urxvt; ack_command; main_menu ;;
     Back)      main_menu ;;
+  esac
+}
+
+setup_menu() {
+  show_ascii_art
+  choice=$(printf '%s\n' "Sublime Text Editor" "Back" \
+    | gum choose --header="Setup") || main_menu
+  case "$choice" in
+    "JSublime Text Editor")     triton-install-sublime ack_command; main_menu ;;
+    Back)                       main_menu ;;
   esac
 }
 
