@@ -10,39 +10,39 @@ printf "=== FreeBSD Sublime Text 4 Installer ===\n"
 
 # 1. Update package database
 printf "Updating package repository..."
-pkg update -f
+doas pkg update -f
 
 # 2. Enable and start Linux 64-bit compatibility (Linuxulator)
 printf "Enabling Linux 64-bit compatibility..."
 
 if ! kldstat | grep -q linux64; then
     printf "  Loading linux64 kernel module..."
-    kldload linux64 || { echo "Failed to load linux64 module. Check dmesg."; exit 1; }
+    doas kldload linux64 || { echo "Failed to load linux64 module. Check dmesg."; exit 1; }
 else
     printf "  linux64 module already loaded."
 fi
 
 # Make it permanent
-sysrc linux_enable="YES" > /dev/null
+doas sysrc linux_enable="YES" > /dev/null
 
 # Start the service (mounts /compat/linux etc.)
 if ! service linux status >/dev/null 2>&1; then
     printf "  Starting Linux compatibility service..."
-    service linux start
+    doas service linux start
 else
     printf "  Linux service already running."
 fi
 
 # 3. Install a Linux base (recommended for better library support)
 printf "Installing Linux base (CentOS 7 compatibility)..."
-pkg install -y linux_base-c7 || printf "  linux_base-c7 already installed or not needed.\n"
+doas pkg install -y linux_base-c7 || printf "  linux_base-c7 already installed or not needed.\n"
 
 # Optional: install extra Linux libs that Sublime sometimes needs
-pkg install -y linux-c7-xorg-libs linux-c7-gtk3 || true
+doas pkg install -y linux-c7-xorg-libs linux-c7-gtk3 || true
 
 # 4. Install Sublime Text 4
 printf "→ Installing linux-sublime-text4..."
-pkg install -y linux-sublime-text4
+doas pkg install -y linux-sublime-text4
 
 printf "\n=== Installation completed successfully! ===\n"
 printf ""
